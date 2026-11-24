@@ -1,93 +1,96 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import GameScene from './game/GameScene'
 
-type Direction = 'forward' | 'backward' | 'left' | 'right'
+type Controls = { forward: boolean; backward: boolean; left: boolean; right: boolean }
+type Direction = keyof Controls
+
+const emptyControls: Controls = { forward: false, backward: false, left: false, right: false }
 
 export default function App() {
-  const [position, setPosition] = useState<[number, number]>([0, 0])
+  const [controls, setControls] = useState<Controls>(emptyControls)
   const [isRiding, setIsRiding] = useState(false)
   const [deliveries, setDeliveries] = useState(0)
 
-  const move = useCallback((direction: Direction) => {
-    const step = isRiding ? 0.8 : 0.35
-    setPosition(([x, z]) => {
-      switch (direction) {
-        case 'forward': return [x, z - step]
-        case 'backward': return [x, z + step]
-        case 'left': return [x - step, z]
-        case 'right': return [x + step, z]
-      }
-    })
-  }, [isRiding])
-
   useEffect(() => {
+    const keyMap: Record<string, Direction> = {
+      w: 'forward', ArrowUp: 'forward',
+      s: 'backward', ArrowDown: 'backward',
+      a: 'left', ArrowLeft: 'left',
+      d: 'right', ArrowRight: 'right',
+    }
     const onKeyDown = (event: KeyboardEvent) => {
-      const keys: Record<string, Direction> = {
-        w: 'forward', ArrowUp: 'forward',
-        s: 'backward', ArrowDown: 'backward',
-        a: 'left', ArrowLeft: 'left',
-        d: 'right', ArrowRight: 'right',
-      }
-      const direction = keys[event.key]
+      const direction = keyMap[event.key]
       if (direction) {
         event.preventDefault()
-        move(direction)
+        setControls((current) => ({ ...current, [direction]: true }))
       }
-      if (event.key.toLowerCase() === 'e') setIsRiding((value) => !value)
+      if (event.key.toLowerCase() === 'e' && !event.repeat) setIsRiding((value) => !value)
     }
+    const onKeyUp = (event: KeyboardEvent) => {
+      const direction = keyMap[event.key]
+      if (direction) setControls((current) => ({ ...current, [direction]: false }))
+    }
+    const releaseAll = () => setControls(emptyControls)
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [move])
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', releaseAll)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', releaseAll)
+    }
+  }, [])
 
-  const deliver = () => {
-    setDeliveries((count) => count + 1)
-    setPosition([0, 0])
+  const hold = (direction: Direction, pressed: boolean) => {
+    setControls((current) => ({ ...current, [direction]: pressed }))
   }
+
+  const deliver = () => setDeliveries((count) => count + 1)
 
   return (
     <main className="game-shell">
-      <GameScene playerPosition={position} isRiding={isRiding} />
+      <GameScene controls={controls} isRiding={isRiding} />
       <header className="top-hud">
         <div className="brand">
           <span className="brand-mark">CL</span>
-          <div><strong>COURIER LIFE</strong><small>SIMULATOR 3D · EARLY BUILD</small></div>
+          <div><strong>COURIER LIFE</strong><small>SIMULATOR 3D · PROTOTYPE 0.2</small></div>
         </div>
         <div className="status-pill"><span className="status-dot" /> SHIFT PAGI</div>
       </header>
 
       <section className="mission-card">
-        <span className="eyebrow">TUGAS AKTIF</span>
-        <strong>Antarkan paket pertama</strong>
-        <p>Keluar dari gudang dan jelajahi area sekitar.</p>
-        <div className="mission-progress"><span style={{ width: deliveries > 0 ? '100%' : '12%' }} /></div>
-        <small>{deliveries > 0 ? 'Paket berhasil diserahkan!' : 'Tujuan: Area penerimaan paket'}</small>
+        <span className="eyebrow">LATIHAN KENDARAAN</span>
+        <strong>{isRiding ? 'Mode berkendara aktif' : 'Siap memulai perjalanan?'}</strong>
+        <p>{isRiding ? 'W/S gas dan rem · A/D belok kiri/kanan.' : 'Berjalan dengan W/S, lalu coba naik motor.'}</p>
+        <div className="mission-progress"><span style={{ width: isRiding ? '65%' : '25%' }} /></div>
+        <small>Kamera mengikuti posisi kurir secara otomatis.</small>
       </section>
 
       <div className="bottom-hud">
         <div className="stats-card">
-          <span>UANG</span><strong>Rp { (deliveries * 15000).toLocaleString('id-ID') }</strong>
+          <span>UANG</span><strong>Rp {(deliveries * 15000).toLocaleString('id-ID')}</strong>
           <span className="divider-line" />
           <span>TERKIRIM</span><strong>{deliveries} paket</strong>
         </div>
         <div className="action-stack">
           <button className="action-button" onClick={() => setIsRiding((value) => !value)}>
-            {isRiding ? 'TURUN' : 'NAIK MOTOR'} <kbd>E</kbd>
+            {isRiding ? 'TURUN MOTOR' : 'NAIK MOTOR'} <kbd>E</kbd>
           </button>
-          <button className="action-button primary" onClick={deliver}>SERAHKAN PAKET</button>
+          <button className="action-button primary" onClick={deliver}>UJI SERAH PAKET</button>
         </div>
       </div>
 
       <nav className="touch-controls" aria-label="Kontrol gerakan">
         <div className="d-pad">
-          <button className="up" onClick={() => move('forward')} aria-label="Maju">▲</button>
-          <button className="left" onClick={() => move('left')} aria-label="Kiri">◀</button>
-          <button className="down" onClick={() => move('backward')} aria-label="Mundur">▼</button>
-          <button className="right" onClick={() => move('right')} aria-label="Kanan">▶</button>
+          <button className="up" onPointerDown={() => hold('forward', true)} onPointerUp={() => hold('forward', false)} onPointerLeave={() => hold('forward', false)} onContextMenu={(e) => e.preventDefault()} aria-label="Maju">▲</button>
+          <button className="left" onPointerDown={() => hold('left', true)} onPointerUp={() => hold('left', false)} onPointerLeave={() => hold('left', false)} onContextMenu={(e) => e.preventDefault()} aria-label="Kiri">◀</button>
+          <button className="down" onPointerDown={() => hold('backward', true)} onPointerUp={() => hold('backward', false)} onPointerLeave={() => hold('backward', false)} onContextMenu={(e) => e.preventDefault()} aria-label="Mundur">▼</button>
+          <button className="right" onPointerDown={() => hold('right', true)} onPointerUp={() => hold('right', false)} onPointerLeave={() => hold('right', false)} onContextMenu={(e) => e.preventDefault()} aria-label="Kanan">▶</button>
         </div>
-        <span className="control-hint">GERAK</span>
+        <span className="control-hint">TAHAN UNTUK BERGERAK</span>
       </nav>
 
-      <div className="build-label">PROTOTYPE 0.1.0 <span>·</span> AREA GUDANG</div>
+      <div className="build-label">PROTOTYPE 0.2.0 <span>·</span> FISIKA AKTIF</div>
     </main>
   )
 }
