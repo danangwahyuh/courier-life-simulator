@@ -144,7 +144,7 @@ function Player({ controls, isRiding }: GameSceneProps) {
       ccd
     >
       <CapsuleCollider args={[0.48, 0.28]} />
-      <group position={[0, -0.82, 0]}>
+      <group position={[0, isRiding ? -0.98 : -0.2, 0]}>
         {isRiding ? <Motorcycle /> : <WalkingCourier />}
       </group>
     </RigidBody>
