@@ -69,3 +69,13 @@ Kontrol saat ini adalah prototype handling arcade sederhana. Model motor masih m
 ## Lisensi
 
 Lisensi proyek belum ditetapkan. Jangan mendistribusikan ulang aset pihak ketiga tanpa memeriksa lisensinya.
+
+
+## Prototype 0.3.0
+
+- Motorcycle and walking courier now use separate Rapier rigid bodies.
+- The motorcycle can only be mounted when the courier is within approximately 2.25 world units.
+- Press **E** or use the on-screen action button to mount or dismount.
+- While mounted, W/S accelerate and brake, while A/D steer. Dismounting places the courier beside the motorcycle.
+- Motorcycle handling is currently arcade-style chassis physics; independently simulated wheels, suspension, and tire grip are not implemented yet.
+
