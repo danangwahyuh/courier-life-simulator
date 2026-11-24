@@ -26,7 +26,7 @@ export default function App() {
         setControls((current) => ({ ...current, [direction]: true }))
       }
       if (event.key.toLowerCase() === 'e' && !event.repeat) {
-        setIsRiding((riding) => riding || canMount)
+        setIsRiding((riding) => (riding ? false : canMount))
       }
     }
     const onKeyUp = (event: KeyboardEvent) => {
