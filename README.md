@@ -1,30 +1,32 @@
 # Courier Life Simulator 3D
 
-Game simulasi kurir 3D open-world berlatar Indonesia, dirancang dengan pendekatan **mobile-first** dan ditargetkan berjalan di web/PWA.
+Game simulasi kurir 3D open-world berlatar Indonesia, dirancang mobile-first untuk web/PWA.
 
 ## Status proyek
 
-**Prototype 0.1.0 — kerangka aplikasi dan scene awal.**
+**Prototype 0.2.0 — kontrol kontinu dan fisika pemain.**
 
 Yang sudah tersedia:
 - Aplikasi React + TypeScript + Vite.
-- Scene 3D awal berisi jalan, bangunan gudang, lingkungan, dan karakter kurir low-poly.
-- Kontrol gerak melalui keyboard (WASD / tombol panah) dan tombol layar sentuh.
-- Tombol simulasi naik/turun motor.
-- HUD tugas dan penghitung paket (sementara masih berupa simulasi UI).
+- Scene 3D area gudang, jalan, bangunan, dan karakter kurir.
+- Fisika dasar pemain menggunakan Rapier: gravitasi, collider, dan tabrakan lingkungan.
+- Gerakan kontinu menggunakan keyboard dan tombol sentuh.
+- Mode berjalan dan mode motor dengan kecepatan berbeda.
+- Kamera third-person mengikuti pemain dengan interpolasi halus.
+- HUD status latihan kendaraan.
 
-Target milestone pertama berikutnya adalah *playable vertical slice*:
-- Pergerakan karakter dan kendaraan dengan fisika.
-- Area gudang dan lingkungan yang lebih lengkap.
-- Sistem rute dan titik tujuan pengantaran.
-- Serah-terima paket berdasarkan jarak/interaksi.
+Target milestone vertical slice berikutnya:
+- Sistem motor terpisah dengan suspensi/roda dan handling yang lebih realistis.
+- Titik interaksi naik/turun motor yang mempertimbangkan jarak.
+- Rute dan titik tujuan pengantaran.
+- Serah-terima paket berbasis jarak dan tombol interaksi.
 - Penyimpanan progres permainan.
 
 ## Teknologi
 
 - React + TypeScript + Vite
 - Three.js + React Three Fiber + Drei
-- Rapier Physics (disiapkan untuk implementasi fisika)
+- Rapier Physics melalui `@react-three/rapier`
 - GitHub untuk version control
 - Cloudflare Pages untuk deployment web/PWA
 
@@ -49,26 +51,20 @@ npm run preview
 
 ## Kontrol prototype
 
-| Aksi | Kontrol |
-|---|---|
-| Bergerak | W, A, S, D atau tombol panah |
-| Naik/turun motor | E atau tombol NAIK MOTOR / TURUN |
-| Gerak di layar sentuh | D-pad di kiri bawah |
-| Simulasi serah paket | Tombol SERAHKAN PAKET |
+| Aksi | Keyboard | Layar sentuh |
+|---|---|---|
+| Maju / gas | W atau panah atas | Tahan ▲ |
+| Mundur / rem | S atau panah bawah | Tahan ▼ |
+| Belok kiri | A atau panah kiri | Tahan ◀ |
+| Belok kanan | D atau panah kanan | Tahan ▶ |
+| Naik/turun mode motor | E | Tombol NAIK MOTOR / TURUN MOTOR |
 
-> Catatan: kontrol motor, pengantaran, dan hadiah pada versi ini masih prototype sederhana, belum memakai sistem gameplay/fisika final.
-
-## Prinsip pengembangan
-
-- Prioritaskan pengalaman bermain di perangkat mobile.
-- Bangun fitur bertahap dan pastikan setiap milestone dapat diuji.
-- Gunakan aset dengan lisensi yang sesuai dan dokumentasikan sumbernya.
-- Pisahkan sistem gameplay, UI, dunia, dan penyimpanan agar mudah dikembangkan.
+Kontrol saat ini adalah prototype handling arcade sederhana. Model motor masih menempel pada rigid body pemain; sistem kendaraan dengan roda dan suspensi terpisah belum dibuat.
 
 ## Branch
 
-- main: branch utama.
-- development: branch pengembangan aktif.
+- `main`: branch utama.
+- `development`: branch pengembangan aktif.
 
 ## Lisensi
 
